@@ -15,3 +15,15 @@ language = "nodejs"
 run = ["sh", "-c", "node"]
 deploymentTarget = "cloudrun"
 ignorePorts = false
+
+[workflows]
+runButton = "Run server"
+
+[[workflows.workflow]]
+name = "Run server"
+author = 23257371
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node script.js"
