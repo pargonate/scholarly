@@ -1,0 +1,24 @@
+{
+  "done": true,
+  "migration": {
+    "name": "mig_cvuroed1cltn5mtppr20",
+    "operations": [
+      {
+        "add_column": {
+          "up": "0",
+          "table": "courses",
+          "column": {
+            "name": "credits",
+            "type": "int",
+            "comment": ""
+          }
+        }
+      }
+    ]
+  },
+  "migrationType": "pgroll",
+  "name": "mig_cvuroed1cltn5mtppr20",
+  "parent": "mig_cvurnpno1tkgc98jiefg",
+  "schema": "public",
+  "startedAt": "2025-04-15T01:54:03.569203Z"
+}

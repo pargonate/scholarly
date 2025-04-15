@@ -1,0 +1,6 @@
+{
+	"databaseURL": "https://pargonate-jah2r6.us-east-1.xata.sh/db/scholarly",
+	"codegen": {
+		"output": "src/xata.ts"
+	}
+}
