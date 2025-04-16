@@ -1,6 +1,5 @@
 ---
 import Layout from "../layouts/Layout.astro";
-
 ---
 
 <Layout title="Course Composer" description="Add & Edit courses with an form">
@@ -31,25 +30,25 @@ import Layout from "../layouts/Layout.astro";
 		var mode = "";
 		var xataID = "";
 
-		var idArea = document.getElementById("ID-area");
-
 		async function compose(mode, courseName, courseSubject, courseDescription, courseCredits) {
 			if (mode == "") {
 				try {
-					await fetch("https://pargonate-jah2r6.us-east-1.xata.sh/db/scholarly:main", {
+					await fetch("api/course", {
 						method: "POST",
-						body: {
+						body: JSON.stringify ({
 							name: courseName,
 							subject: courseSubject,
 							description: courseDescription,
 							credits: courseCredits
-						},
+						}),
 					});
 				} catch (error) {
 					alert("An error occurred. Please try again later, or check the console (CTRL + SHIFT + I) for more information.");
-					console.log(error);
+					console.log(`🛑 Course ${courseName} failed to POST: ${error}`);
 				}
 
+				console.log(`✅ Course ${courseName} created!`);
+				alert(`Course ${courseName} created!`);
 				window.location.href = "/";
 			}
 		}
@@ -60,15 +59,15 @@ import Layout from "../layouts/Layout.astro";
 
 			if (params.get("mode") === "modify") {
 				mode = "modify";
-				xataID = parseInt(params.get("id") || "0");
-				idArea.hidden = false;
-				document.getElementById("courseID").value = xataID;
+				xataID = params.get("id") || "0";
+				document.getElementById("ID-area").hidden = false;
+				document.getElementById("courseID").textContent = xataID
 			}
 		});
 
 		document.getElementById("courseSubmit").addEventListener("click", (e) => {
 			e.preventDefault();
-			
+
 			const courseName = document.getElementById("courseName").value;
 			const courseSubject = document.getElementById("courseSubject").value;
 			const courseDescription = document.getElementById("courseDescription").value;
@@ -78,10 +77,8 @@ import Layout from "../layouts/Layout.astro";
 				console.log("Fields Missing!")
 				alert("Fields Missing!")
 			} else {
-				compose(mode, courseName, courseSubject, courseDescription, courseCredits)
+				compose(mode, courseName, courseSubject, courseDescription, parseInt(courseCredits))
 			}
 		})
-
-
 	</script>
 </Layout>

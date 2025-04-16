@@ -1,6 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
-
+import { Icon } from 'astro-icon/components';
 import { XataClient } from "../xata";
 
 const xata = new XataClient({
@@ -12,13 +12,18 @@ const { records } = await xata.db.courses.getPaginated({
 	pagination: {
 		size: 50
 	}
-})
+}).catch(error => {
+	console.error("🛑 Error fetching courses:", error);
+	alert("Error fetching courses. Please try again later.");
+	return { records: [] };
+});
+
+console.log(records);
 ---
 <Layout title="Index" description="Index">
 	<table>
 		<thead>
 			<tr>
-				<th>Course ID</th>
 				<th>Course Name</th>
 				<th>Course Subject</th>
 				<th>Course Description</th>
@@ -28,8 +33,17 @@ const { records } = await xata.db.courses.getPaginated({
 		<tbody>
 			{records.map((course) => (
 				<tr>
-					<td>{course.xata_id}</td>
-					<td>{course.name}</td>
+					<td>
+						<div id="courseName-wrapper">
+							{course.name} ({course.id})
+							<div id="courseControls">
+								<a href={`/composer?mode=modify&id=${course.id}`} class="courseControl">
+									<Icon name="ri:pencil-fill" />
+								</a>
+								<Icon name="ri:delete-bin-5-line" />
+							</div>
+						</div>
+					</td>
 					<td>{course.subject}</td>
 					<td>{course.description}</td>
 					<td>{course.credits}</td>
@@ -37,9 +51,9 @@ const { records } = await xata.db.courses.getPaginated({
 			))}
 		</tbody>
 	</table>
-	<div id="control-panel">
+	<!-- <div id="control-panel">
 		<a href=""></a>
-	</div>
+	</div> -->
 	<style>
 		table {
 			border-collapse: collapse;
@@ -50,6 +64,23 @@ const { records } = await xata.db.courses.getPaginated({
 		td {
 			border: 1px solid #ddd;
 			padding: 8px;
+		}
+
+		#courseName-wrapper {
+			display: flex;
+			gap: 15px;
+		}
+
+			#courseControls {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 5px;
+			}
+
+		.courseControl {
+			all: unset;
+			line-height: 0px;
 		}
 
 		th {
