@@ -3,6 +3,13 @@ import Layout from "../layouts/Layout.astro";
 import { Icon } from 'astro-icon/components';
 import { XataClient } from "../xata";
 
+//
+// Frontend Connection
+//	For the user to see the all the courses, we first call the API
+//	to GET all courses (first 50 for performance). If there is an
+//	error, it'll be alerted and will return an empty array.
+//
+
 const xata = new XataClient({
 	apiKey: import.meta.env.XATA_API_KEY,
 	branch: import.meta.env.XATA_BRANCH
@@ -18,7 +25,9 @@ const { records } = await xata.db.courses.getPaginated({
 	return { records: [] };
 });
 
-console.log(records);
+records.forEach(course => {
+	console.log(`✅ Course ${course.name} fetched!`)
+});
 ---
 <Layout title="Index" description="Index">
 	<table>
@@ -37,10 +46,16 @@ console.log(records);
 						<div id="courseName-wrapper">
 							{course.name} ({course.id})
 							<div id="courseControls">
+								{/* 
+									Since editing isn't an immediate action (unlike delete),
+									we send the user to the backend-enabled form /composer.
+								*/}
 								<a href={`/composer?mode=modify&id=${course.id}`} class="courseControl">
 									<Icon name="ri:pencil-fill" />
 								</a>
-								<Icon name="ri:delete-bin-5-line" />
+								<button class="courseDelete courseControl" data-courseID={course.id} data-courseName={course.name}>
+									<Icon name="ri:delete-bin-5-line" />
+								</button>
 							</div>
 						</div>
 					</td>
@@ -51,9 +66,12 @@ console.log(records);
 			))}
 		</tbody>
 	</table>
-	<!-- <div id="control-panel">
-		<a href=""></a>
-	</div> -->
+	<!-- Same goes for adding, not a direct action; send them to the /composer.  -->
+	<div id="control-panel">
+		<a href="/composer">
+			<button>Create Course</button>
+		</a>
+	</div>
 	<style>
 		table {
 			border-collapse: collapse;
@@ -81,6 +99,7 @@ console.log(records);
 		.courseControl {
 			all: unset;
 			line-height: 0px;
+			cursor: pointer;
 		}
 
 		th {
@@ -88,4 +107,41 @@ console.log(records);
 			text-align: left;
 		}
 	</style>
+	<script defer>
+		//
+		// Deleting a Course
+		//	Since deletion is an action, that doesn't need to edit any values,
+		//	we must assign a event listener to a button to execute a DELETE
+		//	request.
+		//
+
+		const courseDelete = document.querySelectorAll(".courseDelete");
+
+		// Assign the delete operation to all buttons (since there will be many courses)
+		courseDelete.forEach(control => {
+			control.addEventListener("click", async (e) => {
+				e.preventDefault();
+				// Course Properties stored in attributes for efficient retrieval 
+				let courseID = control.getAttribute("data-courseID");
+				let courseName = control.getAttribute("data-courseName")
+
+				// Confirmation just to be safe
+				if (confirm(`Are you sure you want to the ${courseName} course?`)) {
+					try {
+						await fetch(`api/course/${courseID}`, {
+							method: "DELETE"
+						});
+					} catch (error) {
+						alert("An error occurred. Please try again later, or check the console (CTRL + SHIFT + I) for more information.");
+						console.log(`🛑 Course ${courseID} failed to DELETE: ${error}`);
+					}
+
+					alert(`Course ${courseName} deleted!`);
+					console.log(`✅ Course ${courseName} deleted!`);
+					// Auto reload (because I care about my user's time)
+					window.location.reload();
+				}
+			});
+		});
+	</script>
 </Layout>

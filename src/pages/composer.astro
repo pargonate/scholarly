@@ -4,6 +4,7 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout title="Course Composer" description="Add & Edit courses with an form">
 	<form>
+		<!-- When adding, there will be no courseID (since it doesn't exist yet) -->
 		<div id="ID-area" hidden>
 			<label for="courseID">ID:</label>
 			<input type="text" id="courseID" name="courseID" disabled />
@@ -26,45 +27,83 @@ import Layout from "../layouts/Layout.astro";
 		</div>
 		<button type="submit" id="courseSubmit">Create Course</button>
 	</form>
-	<script defer>
+	<script defer> 
 		var mode = "";
-		var xataID = "";
+		// With putting the POST and PUT methods together, xata will take
+		// anything for a variable, thus we have to create our own for
+		// consistency.
+		var courseID = crypto.randomUUID();
 
+		// Perform fetch() API requests to my backend API, to be sent to xata
 		async function compose(mode, courseName, courseSubject, courseDescription, courseCredits) {
-			if (mode == "") {
-				try {
-					await fetch("api/course", {
-						method: "POST",
-						body: JSON.stringify ({
-							name: courseName,
-							subject: courseSubject,
-							description: courseDescription,
-							credits: courseCredits
-						}),
-					});
-				} catch (error) {
+			try {
+				await fetch(`api/course/${courseID}`, {
+					method: "POST",
+					body: JSON.stringify ({
+						name: courseName,
+						subject: courseSubject,
+						description: courseDescription,
+						credits: courseCredits
+					}),
+				});
+			} catch (error) {
+				if (mode == "") {
 					alert("An error occurred. Please try again later, or check the console (CTRL + SHIFT + I) for more information.");
 					console.log(`🛑 Course ${courseName} failed to POST: ${error}`);
+				} else if (mode == "modify") {
+					alert("An error occurred. Please try again later, or check the console (CTRL + SHIFT + I) for more information.");
+					console.log(`🛑 Course ${courseName} failed to UPDATE: ${error}`);					
 				}
+			}
 
+			// Change verbiage based on mode
+			if (mode == "") {
 				console.log(`✅ Course ${courseName} created!`);
 				alert(`Course ${courseName} created!`);
-				window.location.href = "/";
+			} else if (mode == "modify") {
+				console.log(`✅ Course ${courseName} updated!`);
+				alert(`Course ${courseName} updated!`);
 			}
+			
+			// Since action is completed, they don't need to be within the composer anymore
+			window.location.href = "/";
 		}
 
 		document.addEventListener('DOMContentLoaded', () => {
+			// Get search params
 			const url = new URL(window.location.href);
 			const params = url.searchParams;
 
 			if (params.get("mode") === "modify") {
 				mode = "modify";
-				xataID = params.get("id") || "0";
+				courseID = params.get("id") || "0";
+
+				// Auto-fill the courseID, course information, and change the button text
 				document.getElementById("ID-area").hidden = false;
-				document.getElementById("courseID").textContent = xataID
+				document.getElementById("courseID").value = courseID;
+				document.getElementById("courseSubmit").textContent = "Modify Course";
+
+				try {
+					fetch(`api/course/${courseID}`)
+					.then((response) => response.json())
+					.then((json) => 
+						{
+							document.getElementById("courseName").value = json.name;
+							document.getElementById("courseSubject").value = json.subject;
+							document.getElementById("courseDescription").value = json.description;
+							document.getElementById("courseCredits").value = json.credits;
+						}
+					);
+				} catch (error) {
+					alert("An error occurred. Please try again later, or check the console (CTRL + SHIFT + I) for more information.");
+					console.log(`🛑 Course ${courseID} failed to GET: ${error}`);
+				}
+
+				console.log(`✅ Course ${courseName}'s info fetched!`);
 			}
 		});
 
+		// Handle submit requests
 		document.getElementById("courseSubmit").addEventListener("click", (e) => {
 			e.preventDefault();
 
