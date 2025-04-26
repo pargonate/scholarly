@@ -24,7 +24,7 @@ console.log(privilege);
 					<option value="teacher">Teacher</option>
 					<option value="admin">Admin</option>
 				</select>
-				<button id="role-update">Update Role</button>
+				<button id="role-update" onclick="test()">Update Role</button>
 			</div>
 		</div>
 	</UserButton.UserProfilePage>
@@ -106,9 +106,19 @@ console.log(privilege);
 	}	
 </style>
 <script define:vars={{ user, privilege }} is:inline>
-	const rolesSelector = document.getElementById("roles-selector");
-	console.log(rolesSelector);
-	// console.log(user, privilege);
+	function handleRoleUpdate() {
+		const selectedRole = document.getElementById("roles-dropdown").value;
+		console.log(`Selected role: ${selectedRole}`);
+	}
 
-	// document.getElementById("roles-dropdown").selected = privilege;
+	// Wait for the button to be available in the DOM
+	const observer = new MutationObserver(() => {
+		const updateButton = document.getElementById("role-update");
+		if (updateButton) {
+			updateButton.addEventListener("click", handleRoleUpdate);
+			observer.disconnect();
+		}
+	});
+
+	observer.observe(document.body, { childList: true, subtree: true });
 </script>
