@@ -1,0 +1,32 @@
+---
+import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/astro/components";
+import { Icon } from 'astro-icon/components';
+import Settings from "../components/Settings.astro"
+
+// if (!Astro.locals.auth().userId) {
+//   return Astro.redirect('/login')
+// }
+---
+
+<nav>
+	<a href="/">
+		<h1>Scholarly</h1>
+	</a>
+	<a href="/schedule">Schedule</a>
+	<a href="/credits">Credits</a>
+	<SignedOut>
+		<SignInButton mode="modal" />
+	</SignedOut>
+	<SignedIn>
+		<Settings />
+	</SignedIn>	
+</nav>
+<style>
+	/* Extracted from other Clerk components */
+	nav {
+		display: flex;
+		align-items: center;
+		justify-content: space-around;
+		height: 75px;
+	}
+</style>

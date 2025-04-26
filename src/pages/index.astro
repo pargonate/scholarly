@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
 import { Icon } from 'astro-icon/components';
 import { XataClient } from "../xata";
 
@@ -29,7 +30,8 @@ records.forEach(course => {
 	console.log(`✅ Course ${course.name} fetched!`)
 });
 ---
-<Layout title="Index" description="Index">
+<Layout title="Courses" description="Courses">
+	<Nav />
 	<table>
 		<thead>
 			<tr>

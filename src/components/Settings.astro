@@ -1,0 +1,114 @@
+---
+import { UserButton } from "@clerk/astro/components";
+import { Icon } from 'astro-icon/components';
+
+const user = await Astro.locals.currentUser();
+const privilege = user?.publicMetadata.role;
+console.log(privilege);
+---
+
+<UserButton>
+	<!-- <UserButton.MenuItems>
+		<UserButton.Action label=`Switch Role` clickIdentifier="change_role">
+			<Icon slot="label-icon" name="ri:shield-user-fill" />
+		</UserButton.Action>
+	</UserButton.MenuItems> -->
+	<UserButton.UserProfilePage label="Scholarly Account" url="custom">
+		<Icon slot="label-icon" name="ri:shield-user-fill" />
+		<div>
+			<h1 id="page-name">Scholarly Account</h1>
+			<div id="roles-container">
+				<label for="roles" id="roles-label">Role Selector</label>
+				<select id="roles-dropdown">
+					<option value="student">Student</option>
+					<option value="teacher">Teacher</option>
+					<option value="admin">Admin</option>
+				</select>
+				<button id="role-update">Update Role</button>
+			</div>
+		</div>
+	</UserButton.UserProfilePage>
+</UserButton>
+<style>
+	#page-name {
+		font-size: 1.0625rem;
+		line-height: 1.41176;
+	}
+
+	#roles-container {
+		box-sizing: border-box;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		border-top: 1px solid rgba(0, 0, 0, 0.07);
+		padding-top: 1rem;
+		padding-bottom: 1rem;
+		gap: 1.5rem;
+	}
+
+	#roles-label {
+		box-sizing: border-box;
+		margin: 0px;
+		font-size: 0.8125rem;
+		font-family: inherit;
+		letter-spacing: normal;
+		font-weight: 500;
+		line-height: 1.38462;
+		color: inherit;
+	}
+
+	#roles-dropdown {
+		font-size: 0.8125rem;
+		font-family: inherit;
+		letter-spacing: normal;
+		font-weight: 500;
+		line-height: 1.38462;
+		color: inherit;
+		background-color: transparent;
+		border: none;
+		padding: 0;
+	}
+
+	#role-update:hover {
+		background-color: var(--alpha);
+		color: var(--accentHover);
+	}
+
+	#role-update {
+		margin: 0px;
+		border-width: 0px;
+		outline: 0px;
+		user-select: none;
+		cursor: pointer;
+		background-color: unset;
+		color: var(--accent);
+		border-radius: 0.375rem;
+		position: relative;
+		isolation: isolate;
+		display: inline-flex;
+		align-items: center;
+		transition-property: background-color, background, border-color, color, fill, stroke, opacity, box-shadow, transform;
+		transition-duration: 100ms;
+		font-family: inherit;
+		letter-spacing: normal;
+		font-weight: 500;
+		font-size: 0.8125rem;
+		line-height: 1.38462;
+		--accent: #2F3037;
+		--accentHover: #3B3C45;
+		--border: #2F3037;
+		--accentContrast: white;
+		--alpha: hsla(0, 0%, 0%, 0.03);
+		white-space: nowrap;
+		justify-content: start;
+		gap: 0.5rem;
+		padding: 0.375rem 0.75rem 0.375rem 0.625rem;
+	}	
+</style>
+<script define:vars={{ user, privilege }} is:inline>
+	const rolesSelector = document.getElementById("roles-selector");
+	console.log(rolesSelector);
+	// console.log(user, privilege);
+
+	// document.getElementById("roles-dropdown").selected = privilege;
+</script>
