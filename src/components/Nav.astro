@@ -1,11 +1,9 @@
 ---
-import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/astro/components";
-import { Icon } from 'astro-icon/components';
-import Settings from "../components/Settings.astro"
+import Image from 'astro/components/Image.astro';
+import { getSession } from 'auth-astro/server';
 
-// if (!Astro.locals.auth().userId) {
-//   return Astro.redirect('/login')
-// }
+const session = await getSession(Astro.request)
+console.log(session);
 ---
 
 <nav>
@@ -14,19 +12,30 @@ import Settings from "../components/Settings.astro"
 	</a>
 	<a href="/schedule">Schedule</a>
 	<a href="/credits">Credits</a>
-	<SignedOut>
-		<SignInButton mode="modal" />
-	</SignedOut>
-	<SignedIn>
-		<Settings />
-	</SignedIn>	
+	<button id="login">Login</button>
+	<button id="logout">Logout</button>
+	{session ? (
+		<p>Welcome {session.user?.name}</p>
+		<Image src={session.user?.image} alt='profile_photo' width={32} height={32} />
+	  ) : (
+		<p>Not logged in</p>
+	  )}	
 </nav>
 <style>
-	/* Extracted from other Clerk components */
 	nav {
 		display: flex;
 		align-items: center;
 		justify-content: space-around;
-		height: 75px;
+		height: 100px;
 	}
 </style>
+<script>
+    const { signIn, signOut } = await import("auth-astro/client")
+	document.querySelector("#login").addEventListener("click", () => {
+		signIn("github");
+	})
+
+	document.querySelector("#logout").addEventListener("click", () => {
+		signOut();
+	})
+</script>

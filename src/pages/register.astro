@@ -1,0 +1,88 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Register an Account" description="Allows a user to register an account via Supabase.">
+	<div id="form-wrapper">
+		<div id="form-container">
+			<h1>Register an Scholarly Account</h1>
+			<p>Already have an account? <a href="/signin">Sign in!</a></p>
+			<form action="/api/auth/register" method="post" id=form>
+				<div id="name">
+					<div class=input>
+						<label for="firstName">First Name</label>
+						<input type="text" name="firstName" id="firstName" /> 
+					</div>
+			
+					<div class=input>
+						<label for="lastName">Last Name</label>
+						<input type="text" name="lastName" id="lastName" /> 
+					</div>
+				</div>
+		
+				<div class=input>
+					<label for="role">Are you a student or teacher?</label>
+					<select name="role-dropdown" id="role-dropdown">
+						<option value="Student">Student</option>
+						<option value="Teacher">Teacher</option>
+					</select>
+				</div>
+		
+				<div class=input>
+					<label for="email">Email</label>
+					<input type="email" name="email" id="email" />
+				</div>
+		
+				<div class=input>
+					<label for="password">Password</label>
+					<input type="password" name="password" id="password" />
+				</div>
+		
+				<button type="submit">Register!</button>
+			</form>
+		</div>
+	</div>
+</Layout>
+<style>
+	body {
+		background-color: #000;
+		color: #FFF;
+	}
+
+	#form-wrapper {
+		width: 100vw;
+		height: 100vh;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+
+	#form-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		width: fit-content;
+		min-height: fit-content;
+		background-color: #0a0a0a;
+		padding: 0 25px;
+	}
+
+	#form {
+		display: flex;
+		flex-direction: column;
+		padding: 25px 0;
+		gap: 25px;
+		height: fit-content;
+	}
+
+	#name {
+		display: flex;
+		gap: 25px;
+	}
+
+	.input {
+		display: flex;
+		flex-direction: column;		
+	}
+</style>

@@ -2,33 +2,6 @@
 import Layout from "../layouts/Layout.astro";
 import Nav from "../components/Nav.astro";
 import { Icon } from 'astro-icon/components';
-import { XataClient } from "../xata";
-
-//
-// Frontend Connection
-//	For the user to see the all the courses, we first call the API
-//	to GET all courses (first 50 for performance). If there is an
-//	error, it'll be alerted and will return an empty array.
-//
-
-const xata = new XataClient({
-	apiKey: import.meta.env.XATA_API_KEY,
-	branch: import.meta.env.XATA_BRANCH
-});
-
-const { records } = await xata.db.courses.getPaginated({
-	pagination: {
-		size: 50
-	}
-}).catch(error => {
-	console.error("🛑 Error fetching courses:", error);
-	alert("Error fetching courses. Please try again later.");
-	return { records: [] };
-});
-
-records.forEach(course => {
-	console.log(`✅ Course ${course.name} fetched!`)
-});
 ---
 <Layout title="Courses" description="Courses">
 	<Nav />
@@ -42,7 +15,7 @@ records.forEach(course => {
 			</tr>
 		</thead>
 		<tbody>
-			{records.map((course) => (
+			<!-- {records.map((course) => (
 				<tr>
 					<td>
 						<div id="courseName-wrapper">
@@ -65,7 +38,7 @@ records.forEach(course => {
 					<td>{course.description}</td>
 					<td>{course.credits}</td>
 				</tr>
-			))}
+			))} -->
 		</tbody>
 	</table>
 	<!-- Same goes for adding, not a direct action; send them to the /composer.  -->
