@@ -1,5 +1,0 @@
-//
-// SUPABASE COURSE CREATION
-//
-//
-

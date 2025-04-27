@@ -24,6 +24,10 @@ const metadata = user.user_metadata;
 			<label for="courseID">ID:</label>
 			<input type="text" id="courseID" name="courseID" disabled />
 		</div>
+		<div id="creator-area" hidden>
+			<label for="creator">Creator:</label>
+			<input type="text" id="creator" name="creator" disabled />
+		</div>
 		<div>
 			<label for="courseName">Name:</label>
 			<input type="text" id="courseName" name="courseName" required />
@@ -51,26 +55,42 @@ const metadata = user.user_metadata;
 
 		// Perform fetch() API requests to my backend API, to be sent to Supabase
 		async function compose(mode, courseName, courseSubject, courseDescription, courseCredits) {
-			try {
-				await fetch(`/api/course/${courseID}`, {
-					method: "POST",
-					body: JSON.stringify ({
-						creator_id: user.id,
-						creator_name: `${metadata.first_name} ${metadata.last_name}`,
-						course_id: courseID,
-						name: courseName,
-						subject: courseSubject,
-						description: courseDescription,
-						credits: courseCredits
-					}),
-				});
-			} catch (error) {
-				if (mode == "") {
+			if (mode == "") {
+				try {
+					await fetch(`/api/course/${courseID}`, {
+						method: "POST",
+						body: JSON.stringify ({
+							creator_id: user.id,
+							creator_name: `${metadata.first_name} ${metadata.last_name}`,
+							course_id: courseID,
+							name: courseName,
+							subject: courseSubject,
+							description: courseDescription,
+							credits: courseCredits
+						}),
+					});
+				} catch (error) {
 					alert("An error occurred. Please try again later, or check the console (CTRL + SHIFT + I) for more information.");
 					console.log(`🛑 Course ${courseName} failed to POST: ${error}`);
-				} else if (mode == "modify") {
+				}
+			} else if (mode == "modify") {
+				// Doesn't include creator_name because it would be illogical
+				// to change as then it wouldn't reflect the original creator.
+				try {
+					await fetch(`/api/course/${courseID}`, {
+						method: "PUT",
+						body: JSON.stringify ({
+							creator_id: user.id,
+							course_id: courseID,
+							name: courseName,
+							subject: courseSubject,
+							description: courseDescription,
+							credits: courseCredits
+						}),
+					});
+				} catch (error) {
 					alert("An error occurred. Please try again later, or check the console (CTRL + SHIFT + I) for more information.");
-					console.log(`🛑 Course ${courseName} failed to UPDATE: ${error}`);					
+					console.log(`🛑 Course ${courseName} failed to PUT: ${error}`);					
 				}
 			}
 
@@ -99,6 +119,9 @@ const metadata = user.user_metadata;
 				// Auto-fill the courseID, course information, and change the button text
 				document.getElementById("ID-area").hidden = false;
 				document.getElementById("courseID").value = courseID;
+
+				document.getElementById("creator-area").hidden = false;
+
 				document.getElementById("courseSubmit").textContent = "Modify Course";
 
 				try {
@@ -106,10 +129,11 @@ const metadata = user.user_metadata;
 					.then((response) => response.json())
 					.then((json) => 
 						{
-							document.getElementById("courseName").value = json.name;
-							document.getElementById("courseSubject").value = json.subject;
-							document.getElementById("courseDescription").value = json.description;
-							document.getElementById("courseCredits").value = json.credits;
+							document.getElementById("creator").value = json.data[0].creator_name;
+							document.getElementById("courseName").value = json.data[0].name;
+							document.getElementById("courseSubject").value = json.data[0].subject;
+							document.getElementById("courseDescription").value = json.data[0].description;
+							document.getElementById("courseCredits").value = json.data[0].credits;
 						}
 					);
 				} catch (error) {
