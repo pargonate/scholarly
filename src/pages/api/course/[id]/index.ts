@@ -18,9 +18,9 @@ export const POST: APIRoute = async ({ params, request }) => {
 
 	const courseData = await request.json();
 	const course = await supabase.from("courses").insert({
-		course_id: courseID, 
 		creator_id: courseData.creator_id,
 		creator_name: courseData.creator_name,
+		course_id: courseID, 
 		name: courseData.name,
 		description: courseData.description,
 		subject: courseData.subject,

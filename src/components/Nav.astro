@@ -1,14 +1,10 @@
 ---
 import { supabase } from "../lib/supabase";
 
-const { data, error } = await supabase.auth.getUser();
-
-if (error) {
-	return new Response("User authentication failed", { status: 401 });
-}
+const { data } = await supabase.auth.getUser();
 
 const user = data.user;
-const metadata = user.user_metadata;
+const metadata = user?.user_metadata;
 ---
 
 <nav>
@@ -19,8 +15,8 @@ const metadata = user.user_metadata;
 	<a href="/schedule">Schedule</a>
 	<a href="/credits">Credits</a>
 	<div>
-		<p>{metadata.first_name} {metadata.last_name}</p>
-		<p>{metadata.role}</p>
+		<p>{metadata?.first_name} {metadata?.last_name}</p>
+		<p>{metadata?.role}</p>
 		<form action="/api/auth/logout">
 			<button type="submit">Sign out</button>
 		</form>

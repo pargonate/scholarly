@@ -1,7 +1,7 @@
 //
-// SUPABASE SIGN IN 
+// SUPABASE LOG IN 
 //	With a valid (created) account, users should be able to
-// 	simply sign in with a email and password and access their
+// 	simply log in with a email and password and access their
 //	routes (based on role/permission) with other misc data saved.
 //
 

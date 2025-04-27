@@ -11,11 +11,7 @@ if (result.redirect) {
 import Layout from "../layouts/Layout.astro";
 import { supabase } from "../lib/supabase";
 
-const { data, error } = await supabase.auth.getUser();
-
-if (error) {
-	return new Response("User authentication failed", { status: 401 });
-}
+const { data } = await supabase.auth.getUser();
 
 const user = data.user;
 const metadata = user.user_metadata;
@@ -56,11 +52,12 @@ const metadata = user.user_metadata;
 		// Perform fetch() API requests to my backend API, to be sent to Supabase
 		async function compose(mode, courseName, courseSubject, courseDescription, courseCredits) {
 			try {
-				await fetch(`api/course/${courseID}`, {
+				await fetch(`/api/course/${courseID}`, {
 					method: "POST",
 					body: JSON.stringify ({
 						creator_id: user.id,
 						creator_name: `${metadata.first_name} ${metadata.last_name}`,
+						course_id: courseID,
 						name: courseName,
 						subject: courseSubject,
 						description: courseDescription,
