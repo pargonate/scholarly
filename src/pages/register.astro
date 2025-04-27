@@ -6,7 +6,7 @@ import Layout from "../layouts/Layout.astro";
 	<div id="form-wrapper">
 		<div id="form-container">
 			<h1>Register an Scholarly Account</h1>
-			<p>Already have an account? <a href="/signin">Sign in!</a></p>
+			<p>Already have an account? <a href="/login">Sign in!</a></p>
 			<form action="/api/auth/register" method="post" id=form>
 				<div id="name">
 					<div class=input>
@@ -44,11 +44,6 @@ import Layout from "../layouts/Layout.astro";
 	</div>
 </Layout>
 <style>
-	body {
-		background-color: #000;
-		color: #FFF;
-	}
-
 	#form-wrapper {
 		width: 100vw;
 		height: 100vh;

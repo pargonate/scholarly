@@ -1,41 +1,43 @@
 ---
-import Image from 'astro/components/Image.astro';
-import { getSession } from 'auth-astro/server';
+import { supabase } from "../lib/supabase";
 
-const session = await getSession(Astro.request)
-console.log(session);
+const { data, error } = await supabase.auth.getUser();
+
+if (error) {
+	return new Response("User authentication failed", { status: 401 });
+}
+
+const user = data.user;
+const metadata = user.user_metadata;
 ---
 
 <nav>
 	<a href="/">
 		<h1>Scholarly</h1>
 	</a>
+	<a href="/courses">Courses</a>
 	<a href="/schedule">Schedule</a>
 	<a href="/credits">Credits</a>
-	<button id="login">Login</button>
-	<button id="logout">Logout</button>
-	{session ? (
-		<p>Welcome {session.user?.name}</p>
-		<Image src={session.user?.image} alt='profile_photo' width={32} height={32} />
-	  ) : (
-		<p>Not logged in</p>
-	  )}	
+	<div>
+		<p>{metadata.first_name} {metadata.last_name}</p>
+		<p>{metadata.role}</p>
+		<form action="/api/auth/logout">
+			<button type="submit">Sign out</button>
+		</form>
+	</div>
 </nav>
 <style>
 	nav {
 		display: flex;
 		align-items: center;
 		justify-content: space-around;
-		height: 100px;
+		height: 75px;
+		background-color: #000;
+		color: #FFF;
+	}
+
+	nav a {
+		color: #FFF;
+		text-decoration: none;
 	}
 </style>
-<script>
-    const { signIn, signOut } = await import("auth-astro/client")
-	document.querySelector("#login").addEventListener("click", () => {
-		signIn("github");
-	})
-
-	document.querySelector("#logout").addEventListener("click", () => {
-		signOut();
-	})
-</script>

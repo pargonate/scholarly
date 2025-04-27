@@ -1,5 +1,24 @@
 ---
+// Route Protection (Server)
+import { protectRoute } from "../lib/auth.ts";
+const result = await protectRoute(Astro);
+
+if (result.redirect) {
+	return Astro.redirect(result.redirect);
+}
+
+// Server-Client 
 import Layout from "../layouts/Layout.astro";
+import { supabase } from "../lib/supabase";
+
+const { data, error } = await supabase.auth.getUser();
+
+if (error) {
+	return new Response("User authentication failed", { status: 401 });
+}
+
+const user = data.user;
+const metadata = user.user_metadata;
 ---
 
 <Layout title="Course Composer" description="Add & Edit courses with an form">
@@ -27,19 +46,21 @@ import Layout from "../layouts/Layout.astro";
 		</div>
 		<button type="submit" id="courseSubmit">Create Course</button>
 	</form>
-	<script defer> 
+	<script defer define:vars={{ user, metadata }}> 
 		var mode = "";
-		// With putting the POST and PUT methods together, xata will take
+		// With putting the POST and PUT methods together, Supabase will take
 		// anything for a variable, thus we have to create our own for
 		// consistency.
 		var courseID = crypto.randomUUID();
 
-		// Perform fetch() API requests to my backend API, to be sent to xata
+		// Perform fetch() API requests to my backend API, to be sent to Supabase
 		async function compose(mode, courseName, courseSubject, courseDescription, courseCredits) {
 			try {
 				await fetch(`api/course/${courseID}`, {
 					method: "POST",
 					body: JSON.stringify ({
+						creator_id: user.id,
+						creator_name: `${metadata.first_name} ${metadata.last_name}`,
 						name: courseName,
 						subject: courseSubject,
 						description: courseDescription,
@@ -66,7 +87,7 @@ import Layout from "../layouts/Layout.astro";
 			}
 			
 			// Since action is completed, they don't need to be within the composer anymore
-			window.location.href = "/";
+			window.location.href = "/courses";
 		}
 
 		document.addEventListener('DOMContentLoaded', () => {

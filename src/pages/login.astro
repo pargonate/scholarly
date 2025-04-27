@@ -1,22 +1,13 @@
 ---
 import Layout from "../layouts/Layout.astro";
-
-const { cookies, redirect } = Astro;
-
-const accessToken = cookies.get("sb-access-token");
-const refreshToken = cookies.get("sb-refresh-token");
-
-if (accessToken && refreshToken) {
-	return redirect("/dashboard");
-}
 ---
 
-<Layout title="Sign in" description="With a valid and made account, users can sign into Scholarly">
+<Layout title="Log in" description="With a valid and made account, users can log into Scholarly">
 	<div id="form-wrapper">
 		<div id="form-container">
-			<h1>Sign into Scholarly</h1>
+			<h1>Log into Scholarly</h1>
 			<p>New Here? <a href="/register">Create an account!</a></p>
-			<form action="/api/auth/signin" method="post" id="form">
+			<form action="/api/auth/login" method="post" id="form">
 				<div class=input>
 					<label for="email">Email</label>
 					<input type="email" name="email" id="email" />				
@@ -34,11 +25,6 @@ if (accessToken && refreshToken) {
 </Layout>
 
 <style>
-	body {
-		background-color: #000;
-		color: #FFF;
-	}
-
 	#form-wrapper {
 		width: 100vw;
 		height: 100vh;

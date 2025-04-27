@@ -1,53 +1,101 @@
 ---
+// Route Protection (Server)
+import { protectRoute } from "../lib/auth.ts";
+const result = await protectRoute(Astro);
+
+if (result.redirect) {
+	return Astro.redirect(result.redirect);
+}
+
+// Server-Client 
 import Layout from "../layouts/Layout.astro";
-import { supabase } from "../lib/supabase";
+import { Icon } from "astro-icon/components";
 
-const accessToken = Astro.cookies.get("sb-access-token");
-const refreshToken = Astro.cookies.get("sb-refresh-token");
+let courses = []
 
-if (!accessToken || !refreshToken) {
-	return Astro.redirect("/signin");
-}
-
-let session;
 try {
-	session = await supabase.auth.setSession({
-		refresh_token: refreshToken.value,
-		access_token: accessToken.value,
-	});
-
-	if (session.error) {
-		Astro.cookies.delete("sb-access-token", {
-			path: "/",
-		});
-
-		Astro.cookies.delete("sb-refresh-token", {
-			path: "/",
-		});
-
-		return redirect("/signin");
-	}
+	const response = await fetch(`${import.meta.env.SERVER_URL}/api/courses`);
+	courses = await response.json();
 } catch (error) {
-	Astro.cookies.delete("sb-access-token", {
-		path: "/",
-	});
-
-	Astro.cookies.delete("sb-refresh-token", {
-		path: "/",
-	});
-
-	return Astro.redirect("/signin");
+	console.log(`🛑 Supabase failed to GET: ${error}`);
 }
-
-const user = session.data.user;
-const metadata = session.data.user?.user_metadata;
-const name = `${metadata.first_name} ${metadata.last_name}`;
-const role = metadata.role;
 ---
 
 <Layout title="Courses" description="See all courses">
-	<h2>Welcome [{role}] {name}</h2>
-	<form action="/api/auth/signout">
-		<button type="submit">Sign out</button>
-	</form>
+	<table>
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Teacher</th>
+				<th>Subject</th>
+				<th>Description</th>
+				<th>Credits</th>
+			</tr>
+		</thead>
+		<tbody>
+			{courses.map((course) => (
+				<tr>
+					<td>
+						<div id="courseName-wrapper">
+							{course.name} ({course.course_id})
+							<div id="courseControls">
+								{/* 
+									Since editing isn't an immediate action (unlike delete),
+									we send the user to the backend-enabled form /composer.
+								*/}
+								<a href={`/composer?mode=modify&id=${course.course_id}`} class="courseControl">
+									<Icon name="ri:pencil-fill" />
+								</a>
+								<button class="courseDelete courseControl" data-courseID={course.course_id} data-courseName={course.name}>
+									<Icon name="ri:delete-bin-5-line" />
+								</button>
+							</div>
+						</div>
+					</td>
+					<td>{course.creator_name}</td>
+					<td>{course.subject}</td>
+					<td>{course.description}</td>
+					<td>{course.credits}</td>
+				</tr>
+			))}
+		</tbody>
+	</table>	
+	<a href="/composer"><button>Create a Course (TEACHERS ONLY!)</button></a>
 </Layout>
+<style>
+	table {
+		border-collapse: collapse;
+		width: 100%;
+		color: #FFF;
+	}
+
+	th,
+	td {
+		border: 1px solid #000;
+		padding: 8px;
+		/* width: fit-content; */
+	}
+
+	#courseName-wrapper {
+		display: flex;
+		gap: 15px;
+	}
+
+		#courseControls {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 5px;
+		}
+
+	.courseControl {
+		all: unset;
+		line-height: 0px;
+		cursor: pointer;
+	}
+
+	th {
+		background-color: #0a0a0a;
+		text-align: left;
+	}
+</style>

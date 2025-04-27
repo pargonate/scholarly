@@ -1,122 +1,79 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Nav from "../components/Nav.astro";
-import { Icon } from 'astro-icon/components';
 ---
-<Layout title="Courses" description="Courses">
-	<Nav />
-	<table>
-		<thead>
-			<tr>
-				<th>Course Name</th>
-				<th>Course Subject</th>
-				<th>Course Description</th>
-				<th>Course Credits</th>
-			</tr>
-		</thead>
-		<tbody>
-			<!-- {records.map((course) => (
-				<tr>
-					<td>
-						<div id="courseName-wrapper">
-							{course.name} ({course.id})
-							<div id="courseControls">
-								{/* 
-									Since editing isn't an immediate action (unlike delete),
-									we send the user to the backend-enabled form /composer.
-								*/}
-								<a href={`/composer?mode=modify&id=${course.id}`} class="courseControl">
-									<Icon name="ri:pencil-fill" />
-								</a>
-								<button class="courseDelete courseControl" data-courseID={course.id} data-courseName={course.name}>
-									<Icon name="ri:delete-bin-5-line" />
-								</button>
-							</div>
-						</div>
-					</td>
-					<td>{course.subject}</td>
-					<td>{course.description}</td>
-					<td>{course.credits}</td>
-				</tr>
-			))} -->
-		</tbody>
-	</table>
-	<!-- Same goes for adding, not a direct action; send them to the /composer.  -->
-	<div id="control-panel">
-		<a href="/composer">
-			<button>Create Course</button>
-		</a>
-	</div>
-	<style>
-		table {
-			border-collapse: collapse;
-			width: 100%;
-		}
-
-		th,
-		td {
-			border: 1px solid #ddd;
-			padding: 8px;
-		}
-
-		#courseName-wrapper {
-			display: flex;
-			gap: 15px;
-		}
-
-			#courseControls {
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				gap: 5px;
-			}
-
-		.courseControl {
-			all: unset;
-			line-height: 0px;
-			cursor: pointer;
-		}
-
-		th {
-			background-color: #f2f2f2;
-			text-align: left;
-		}
-	</style>
-	<script defer>
-		//
-		// Deleting a Course
-		//	Since deletion is an action, that doesn't need to edit any values,
-		//	we must assign a event listener to a button to execute a DELETE
-		//	request.
-		//
-
-		const courseDelete = document.querySelectorAll(".courseDelete");
-
-		// Assign the delete operation to all buttons (since there will be many courses)
-		courseDelete.forEach(control => {
-			control.addEventListener("click", async (e) => {
-				e.preventDefault();
-				// Course Properties stored in attributes for efficient retrieval 
-				let courseID = control.getAttribute("data-courseID");
-				let courseName = control.getAttribute("data-courseName")
-
-				// Confirmation just to be safe
-				if (confirm(`Are you sure you want to the ${courseName} course?`)) {
-					try {
-						await fetch(`api/course/${courseID}`, {
-							method: "DELETE"
-						});
-					} catch (error) {
-						alert("An error occurred. Please try again later, or check the console (CTRL + SHIFT + I) for more information.");
-						console.log(`🛑 Course ${courseID} failed to DELETE: ${error}`);
-					}
-
-					alert(`Course ${courseName} deleted!`);
-					console.log(`✅ Course ${courseName} deleted!`);
-					// Auto reload (because I care about my user's time)
-					window.location.reload();
-				}
-			});
-		});
-	</script>
+<Layout title="Landing Page" description="Showcase of Scholarly and what it can do">
+	<h1>Welcome to Scholarly!</h1>
 </Layout>
+<style>
+	table {
+		border-collapse: collapse;
+		width: 100%;
+	}
+
+	th,
+	td {
+		border: 1px solid #ddd;
+		padding: 8px;
+	}
+
+	#courseName-wrapper {
+		display: flex;
+		gap: 15px;
+	}
+
+		#courseControls {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 5px;
+		}
+
+	.courseControl {
+		all: unset;
+		line-height: 0px;
+		cursor: pointer;
+	}
+
+	th {
+		background-color: #f2f2f2;
+		text-align: left;
+	}
+</style>
+<script defer>
+	//
+	// Deleting a Course
+	//	Since deletion is an action, that doesn't need to edit any values,
+	//	we must assign a event listener to a button to execute a DELETE
+	//	request.
+	//
+
+	const courseDelete = document.querySelectorAll(".courseDelete");
+
+	// Assign the delete operation to all buttons (since there will be many courses)
+	courseDelete.forEach(control => {
+		control.addEventListener("click", async (e) => {
+			e.preventDefault();
+			// Course Properties stored in attributes for efficient retrieval 
+			let courseID = control.getAttribute("data-courseID");
+			let courseName = control.getAttribute("data-courseName")
+
+			// Confirmation just to be safe
+			if (confirm(`Are you sure you want to the ${courseName} course?`)) {
+				try {
+					await fetch(`api/course/${courseID}`, {
+						method: "DELETE"
+					});
+				} catch (error) {
+					alert("An error occurred. Please try again later, or check the console (CTRL + SHIFT + I) for more information.");
+					console.log(`🛑 Course ${courseID} failed to DELETE: ${error}`);
+				}
+
+				alert(`Course ${courseName} deleted!`);
+				console.log(`✅ Course ${courseName} deleted!`);
+				// Auto reload (because I care about my user's time)
+				window.location.reload();
+			}
+		});
+	});
+</script>
