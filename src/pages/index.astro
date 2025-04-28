@@ -1,4 +1,13 @@
 ---
+// Route Protection (Server)
+import { protectRoute } from "../lib/auth.ts";
+const result = await protectRoute(Astro);
+
+if (result.redirect) {
+	return Astro.redirect(result.redirect);
+}
+
+// Server-Client 
 import Layout from "../layouts/Layout.astro";
 ---
 <Layout title="Landing Page" description="Showcase of Scholarly and what it can do">

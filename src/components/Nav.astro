@@ -1,15 +1,24 @@
 ---
 import { supabase } from "../lib/supabase";
 
-// Get the User
-const { data: userData } = await supabase.auth.getUser();
+const { data: userData, error: userError } = await supabase.auth.getUser();
 
-const user = userData.user;
-const metadata = user?.user_metadata;
+let user = null;
 
-// Get their Role
-const { data: userRole } = await supabase.from("user_roles").select().eq("id", user?.id);
-const role = userRole[0]?.role;
+if (userData?.user) {
+    const { data: userRole, error: roleError } = await supabase
+        .from("user_roles")
+        .select()
+        .eq("id", userData.user.id);
+
+    if (!roleError && userRole?.length > 0) {
+        user = {
+            firstName: userData.user.user_metadata.first_name,
+            lastName: userData.user.user_metadata.last_name,
+            role: userRole[0].role,
+        };
+    }
+}
 ---
 
 <nav>
@@ -20,8 +29,8 @@ const role = userRole[0]?.role;
 	<a href="/schedule">Schedule</a>
 	<a href="/credits">Credits</a>
 	<div>
-		<p>{metadata?.first_name} {metadata?.last_name}</p>
-		<p>{role}</p>
+		<p>{user.firstName} {user.lastName}</p>
+		<p>{user.role}</p>
 		<form action="/api/auth/logout">
 			<button type="submit">Sign out</button>
 		</form>
