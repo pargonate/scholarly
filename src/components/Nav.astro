@@ -8,7 +8,8 @@ const user = userData.user;
 const metadata = user?.user_metadata;
 
 // Get their Role
-const { data: userRole } = await supabase.from("user_roles").select().eq("id", user.id);
+const { data: userRole } = await supabase.from("user_roles").select().eq("id", user?.id);
+const role = userRole[0]?.role;
 ---
 
 <nav>
@@ -20,7 +21,7 @@ const { data: userRole } = await supabase.from("user_roles").select().eq("id", u
 	<a href="/credits">Credits</a>
 	<div>
 		<p>{metadata?.first_name} {metadata?.last_name}</p>
-		<p>{userRole[0].role}</p>
+		<p>{role}</p>
 		<form action="/api/auth/logout">
 			<button type="submit">Sign out</button>
 		</form>
