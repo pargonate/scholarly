@@ -29,7 +29,7 @@ if (userData?.user) {
 	<a href="/schedule">Schedule</a>
 	<a href="/credits">Credits</a>
 	<div>
-		{user ? (
+		{Astro.cookies.has("sb-access-token") ? (
 			<>
 				<p>{user.firstName} {user.lastName}</p>
 				<p>{user.role}</p>
