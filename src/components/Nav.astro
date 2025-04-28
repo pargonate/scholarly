@@ -1,10 +1,14 @@
 ---
 import { supabase } from "../lib/supabase";
 
-const { data } = await supabase.auth.getUser();
+// Get the User
+const { data: userData } = await supabase.auth.getUser();
 
-const user = data.user;
+const user = userData.user;
 const metadata = user?.user_metadata;
+
+// Get their Role
+const { data: userRole } = await supabase.from("user_roles").select().eq("id", user.id);
 ---
 
 <nav>
@@ -16,7 +20,7 @@ const metadata = user?.user_metadata;
 	<a href="/credits">Credits</a>
 	<div>
 		<p>{metadata?.first_name} {metadata?.last_name}</p>
-		<p>{metadata?.role}</p>
+		<p>{userRole[0].role}</p>
 		<form action="/api/auth/logout">
 			<button type="submit">Sign out</button>
 		</form>

@@ -20,20 +20,33 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 		return new Response("First Name, Last Name, Role, Email, and Password are required!", {status: 400});
 	}
 
-	const { error } = await supabase.auth.signUp({
+	const { error: signUpError } = await supabase.auth.signUp({
 		email,
 		password,
 		options: {
 			data: {
 				first_name: firstName,
 				last_name: lastName,
-				role: role
 			},
 		},
 	});
 
-	if (error) {
-		return new Response(error.message, {status: 500});
+	if (signUpError) {
+		return new Response(signUpError.message, {status: 500});
+	}
+
+	// To ensure security, we place the role outside of the user's raw_user_meta_data 
+	// as that can be changed via Curl or Postman (but first we gotta get the user.id)
+
+	const { data } = await supabase.auth.getUser();
+
+	const { error: roleError } = await supabase.from("user_roles").insert({
+		id: data.user.id,
+		role: role
+	});
+
+	if (roleError) {
+		return new Response(roleError.message, {status: 500});
 	}
 
 	return redirect("/login");

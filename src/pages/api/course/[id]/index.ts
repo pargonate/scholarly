@@ -45,7 +45,7 @@ export const GET: APIRoute = async ({ params, request }) => {
 		});
 	}
 
-	const course = await supabase.from("courses").select('*').eq("course_id", courseID);
+	const course = await supabase.from("courses").select().eq("course_id", courseID);
 
 	return new Response(JSON.stringify(course), {
 		status: 200,
