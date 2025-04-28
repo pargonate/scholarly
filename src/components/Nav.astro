@@ -29,11 +29,19 @@ if (userData?.user) {
 	<a href="/schedule">Schedule</a>
 	<a href="/credits">Credits</a>
 	<div>
-		<p>{user.firstName} {user.lastName}</p>
-		<p>{user.role}</p>
-		<form action="/api/auth/logout">
-			<button type="submit">Sign out</button>
-		</form>
+		{user ? (
+			<>
+				<p>{user.firstName} {user.lastName}</p>
+				<p>{user.role}</p>
+				<form action="/api/auth/logout">
+					<button type="submit">Sign out</button>
+				</form>
+			</>
+		) : (
+			<form action="/api/auth/login">
+				<button type="submit">Login</button>
+			</form>
+		)}
 	</div>
 </nav>
 <style>
