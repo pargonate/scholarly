@@ -1,6 +1,7 @@
 ---
 // Route Protection (Server)
 import { protectRoute } from "../lib/auth.ts";
+import { supabase } from "../lib/supabase";
 const result = await protectRoute(Astro);
 
 if (result.redirect) {
@@ -19,6 +20,26 @@ try {
 } catch (error) {
 	console.log(`🛑 Supabase failed to GET: ${error}`);
 }
+
+// Getting user
+const { data: userData, error: userError } = await supabase.auth.getUser();
+
+let user = null;
+
+if (userData?.user) {
+    const { data: userRole, error: roleError } = await supabase
+        .from("user_roles")
+        .select()
+        .eq("id", userData.user.id);
+
+    if (!roleError && userRole?.length > 0) {
+        user = {
+			id: userData.user.id,
+			role: userRole[0].role
+        };
+    }
+}
+
 ---
 
 <Layout title="Courses" description="See all courses">
@@ -43,12 +64,19 @@ try {
 									Since editing isn't an immediate action (unlike delete),
 									we send the user to the backend-enabled form /composer.
 								*/}
-								<a href={`/composer?mode=modify&id=${course.course_id}`} class="courseControl">
-									<Icon name="ri:pencil-fill" />
-								</a>
-								<button class="courseDelete courseControl" data-courseID={course.course_id} data-courseName={course.name}>
-									<Icon name="ri:delete-bin-5-line" />
-								</button>
+								{user?.role === "Teacher" && (
+									<a href={`/composer?mode=modify&id=${course.course_id}`} class="courseControl">
+										<Icon name="ri:pencil-fill" />
+									</a>
+									<button class="courseDelete courseControl" data-courseID={course.course_id} data-courseName={course.name} data-userRole={user.role}>
+										<Icon name="ri:delete-bin-5-line" />
+									</button>
+								)}
+								{user?.role === "Student" && (
+									<button class="courseAdd courseControl" data-courseID={course.course_id} data-courseName={course.name} data-userID={user.id}>
+										<Icon name="ri:add-fill" />
+									</button>
+								)}
 							</div>
 						</div>
 					</td>
@@ -60,7 +88,9 @@ try {
 			))}
 		</tbody>
 	</table>	
-	<a href="/composer"><button>Create a Course (TEACHERS ONLY!)</button></a>
+	{user?.role === "Teacher" && (
+		<a href="/composer"><button>Create a Course</button></a>	
+	)}
 </Layout>
 <style>
 	table {
@@ -100,6 +130,15 @@ try {
 	}
 </style>
 <script defer>
+	document.addEventListener("DOMContentLoaded", () => {
+		const url = new URL(window.location.href);
+		const type = url.searchParams.get("alert");
+
+		if (type === "student-restriction") {
+			alert("You're a student, you cannot edit, delete, or create courses. You can only add them to your schedule.");
+		}
+	});
+
 	//
 	// Deleting a Course
 	//	Since deletion is an action, that doesn't need to edit any values,
@@ -108,30 +147,65 @@ try {
 	//
 
 	const courseDelete = document.querySelectorAll(".courseDelete");
+	const courseAdd = document.querySelectorAll(".courseAdd");
 
 	// Assign the delete operation to all buttons (since there will be many courses)
 	courseDelete.forEach(control => {
 		control.addEventListener("click", async (e) => {
 			e.preventDefault();
 			// Course Properties stored in attributes for efficient retrieval 
+			let userRole = control.getAttribute("data-userRole");
+			let courseID = control.getAttribute("data-courseID");
+			let courseName = control.getAttribute("data-courseName");
+
+
+			if (userRole == "Teacher") {
+				// Confirmation just to be safe
+				if (confirm(`Are you sure you want to the ${courseName} course?`)) {
+					try {
+						await fetch(`api/course/${courseID}`, {
+							method: "DELETE"
+						});
+					} catch (error) {
+						alert("An error occurred. Please try again later, or check the console (CTRL + SHIFT + I) for more information.");
+						console.log(`🛑 Course ${courseID} failed to DELETE: ${error}`);
+					}
+
+					alert(`Course ${courseName} deleted!`);
+					console.log(`✅ Course ${courseName} deleted!`);
+					// Auto reload (because I care about my user's time)
+					window.location.reload();
+				}
+			} else {
+				alert("You're a student, you cannot delete courses. You can only add them to your schedule.");
+			}
+		});
+	});
+
+	// Same goes for adding a course to a schedule
+	courseAdd.forEach(control => {
+		control.addEventListener("click", async(e) => {
+			e.preventDefault();
 			let courseID = control.getAttribute("data-courseID");
 			let courseName = control.getAttribute("data-courseName")
+			let userID = control.getAttribute("data-userID");
 
-			// Confirmation just to be safe
-			if (confirm(`Are you sure you want to the ${courseName} course?`)) {
+			if (confirm(`Are you sure you want to add ${courseName} to your schedule?`)) {
 				try {
-					await fetch(`api/course/${courseID}`, {
-						method: "DELETE"
+					await fetch(`/api/schedule/user/${userID}`, {
+						method: "POST",
+						body: JSON.stringify({
+							course_id: courseID,
+							user_id: userID
+						}),
 					});
+
+					console.log(`✅ Course ${courseName} added to schedule!`);
+					alert(`Course ${courseName} added to schedule!`);
 				} catch (error) {
 					alert("An error occurred. Please try again later, or check the console (CTRL + SHIFT + I) for more information.");
-					console.log(`🛑 Course ${courseID} failed to DELETE: ${error}`);
+					console.log(`🛑 Course ${courseName} failed to POST: ${error}`);					
 				}
-
-				alert(`Course ${courseName} deleted!`);
-				console.log(`✅ Course ${courseName} deleted!`);
-				// Auto reload (because I care about my user's time)
-				window.location.reload();
 			}
 		});
 	});

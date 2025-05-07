@@ -11,10 +11,30 @@ if (result.redirect) {
 import Layout from "../layouts/Layout.astro";
 import { supabase } from "../lib/supabase";
 
-const { data } = await supabase.auth.getUser();
 
-const user = data.user;
-const metadata = user.user_metadata;
+const { data: userData, error: userError } = await supabase.auth.getUser();
+
+let user = null;
+
+if (userData?.user) {
+    const { data: userRole, error: roleError } = await supabase
+        .from("user_roles")
+        .select()
+        .eq("id", userData.user.id);
+
+    if (!roleError && userRole?.length > 0) {
+        user = {
+			id: userData.user.id,
+            firstName: userData.user.user_metadata.first_name,
+            lastName: userData.user.user_metadata.last_name,
+            role: userRole[0].role,
+        };
+    }
+}
+
+if (user?.role === "Student") {
+	return Astro.redirect("/courses?alert=student-restriction");
+}
 ---
 
 <Layout title="Course Composer" description="Add & Edit courses with an form">
@@ -46,7 +66,7 @@ const metadata = user.user_metadata;
 		</div>
 		<button type="submit" id="courseSubmit">Create Course</button>
 	</form>
-	<script defer define:vars={{ user, metadata }}> 
+	<script defer define:vars={{ user }}> 
 		var mode = "";
 		// With putting the POST and PUT methods together, Supabase will take
 		// anything for a variable, thus we have to create our own for
@@ -61,7 +81,7 @@ const metadata = user.user_metadata;
 						method: "POST",
 						body: JSON.stringify ({
 							creator_id: user.id,
-							creator_name: `${metadata.first_name} ${metadata.last_name}`,
+							creator_name: `${user.firstName} ${user.lastName}`,
 							course_id: courseID,
 							name: courseName,
 							subject: courseSubject,

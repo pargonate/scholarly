@@ -26,8 +26,9 @@ if (userData?.user) {
 		<h1>Scholarly</h1>
 	</a>
 	<a href="/courses">Courses</a>
-	<a href="/schedule">Schedule</a>
-	<a href="/credits">Credits</a>
+	{user?.role === "Student" && (
+		<a href="/schedule">Schedule</a>
+	)}
 	<div>
 		{Astro.cookies.has("sb-access-token") ? (
 			<>

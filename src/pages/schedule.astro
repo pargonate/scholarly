@@ -1,0 +1,175 @@
+---
+// Route Protection (Server)
+import { protectRoute } from "../lib/auth.ts";
+import { supabase } from "../lib/supabase";
+const result = await protectRoute(Astro);
+
+if (result.redirect) {
+	return Astro.redirect(result.redirect);
+}
+
+// Server-Client 
+import Layout from "../layouts/Layout.astro";
+import { Icon } from "astro-icon/components";
+
+// First getting user
+const { data: userData, error: userError } = await supabase.auth.getUser();
+
+let user = null;
+
+if (userData?.user) {
+    const { data: userRole, error: roleError } = await supabase
+        .from("user_roles")
+        .select()
+        .eq("id", userData.user.id);
+
+    if (!roleError && userRole?.length > 0) {
+        user = {
+			id: userData.user.id
+        };
+    }
+}
+
+// Then get courses in schedule (since schedules are user orientated)
+let schedule = [];
+let courses = []
+
+try {
+	const response = await fetch(`${import.meta.env.SERVER_URL}/api/schedule/user/${user.id}`);
+	const result = await response.json();
+	schedule = result.data || [];
+} catch (error) {
+	console.log(`🛑 Supabase failed to GET: ${error}`);
+}
+
+
+if (Array.isArray(schedule)) {
+	const coursePromises = schedule.map(async (course) => {
+		let courseID = course.course_id;
+
+		try {
+			const response = await fetch(`${import.meta.env.SERVER_URL}/api/course/${courseID}`);
+			const result = await response.json();	
+			return result.data[0];		
+		} catch (error) {
+			console.log(`🛑 Supabase failed to GET: ${error}`);
+			return null;
+		}
+	});
+	
+	courses = (await Promise.all(coursePromises)).filter(Boolean);
+}
+---
+
+<Layout title="Schedule" description="See your schedule">
+	<table>
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Teacher</th>
+				<th>Subject</th>
+				<th>Description</th>
+				<th>Credits</th>
+			</tr>
+		</thead>
+		<tbody>
+			{courses.map((course) => (
+				<tr>
+					<td>
+						<div id="courseName-wrapper">
+							{course.name} ({course.course_id})
+							<div id="courseControls">
+								{/* 
+									Since editing isn't an immediate action (unlike delete),
+									we send the user to the backend-enabled form /composer.
+								*/}
+								<button class="courseDelete courseControl" data-courseID={course.course_id} data-courseName={course.name} data-userID={user.id}>
+									<Icon name="ri:delete-bin-5-line" />
+								</button>
+							</div>
+						</div>
+					</td>
+					<td>{course.creator_name}</td>
+					<td>{course.subject}</td>
+					<td>{course.description}</td>
+					<td>{course.credits}</td>
+				</tr>
+			))}
+		</tbody>
+	</table>	
+</Layout>
+<style>
+	table {
+		border-collapse: collapse;
+		width: 100%;
+		color: #FFF;
+	}
+
+	th,
+	td {
+		border: 1px solid #000;
+		padding: 8px;
+		/* width: fit-content; */
+	}
+
+	#courseName-wrapper {
+		display: flex;
+		gap: 15px;
+	}
+
+		#courseControls {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 5px;
+		}
+
+	.courseControl {
+		all: unset;
+		line-height: 0px;
+		cursor: pointer;
+	}
+
+	th {
+		background-color: #0a0a0a;
+		text-align: left;
+	}
+</style>
+<script defer>
+	//
+	// Removing a Course
+	//	Since deletion is an action, that doesn't need to edit any values,
+	//	we must assign a event listener to a button to execute a DELETE
+	//	request, which then removes the course from the schedule.
+	//
+
+	const courseDelete = document.querySelectorAll(".courseDelete");
+
+	// Assign the delete operation to all buttons (since there will be many courses)
+	courseDelete.forEach(control => {
+		control.addEventListener("click", async (e) => {
+			e.preventDefault();
+			// Course Properties stored in attributes for efficient retrieval 
+			let userID = control.getAttribute("data-userID");
+			let courseID = control.getAttribute("data-courseID");
+			let courseName = control.getAttribute("data-courseName");
+
+			// Confirmation just to be safe
+			if (confirm(`Are you sure you want to drop ${courseName} from your schedule?`)) {
+				try {
+					await fetch(`api/schedule/user/${userID}/course/${courseID}`, {
+						method: "DELETE"
+					});
+				} catch (error) {
+					alert("An error occurred. Please try again later, or check the console (CTRL + SHIFT + I) for more information.");
+					console.log(`🛑 Course ${courseID} failed to DELETE from schedule: ${error}`);
+				}
+
+				alert(`Course ${courseName} dropped!`);
+				console.log(`✅ Course ${courseName} dropped!`);
+				// Auto reload (because I care about my user's time)
+				window.location.reload();
+			}
+		});
+	});
+</script>
