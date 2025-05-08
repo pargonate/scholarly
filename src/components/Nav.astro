@@ -25,38 +25,95 @@ if (userData?.user) {
 	<a href="/">
 		<h1>Scholarly</h1>
 	</a>
-	<a href="/courses">Courses</a>
-	{user?.role === "Student" && (
-		<a href="/schedule">Schedule</a>
-	)}
-	<div>
-		{Astro.cookies.has("sb-access-token") ? (
-			<>
-				<p>{user.firstName} {user.lastName}</p>
-				<p>{user.role}</p>
-				<form action="/api/auth/logout">
-					<button type="submit">Sign out</button>
+    <div class="dropdown">
+        <button>Menu</button>
+        <div class="dropdown-content">
+			{Astro.cookies.has("sb-access-token") && (
+				<>
+					<p>Welcome, {user.firstName} {user.lastName} [{user.role}]</p>
+				</>
+			)}
+            <a href="/">Home</a>
+			{user?.role === "Student" && (
+				<a href="/schedule">Schedule</a>
+			)}
+            <a href="/courses">Courses</a>
+			{Astro.cookies.has("sb-access-token") ? (
+				<>
+					<form action="/api/auth/logout">
+						<button class="actionButton" type="submit">Sign out</button>
+					</form>
+				</>
+			) : (
+				<form action="/api/auth/login">
+					<button class="actionButton" type="submit">Login</button>
 				</form>
-			</>
-		) : (
-			<form action="/api/auth/login">
-				<button type="submit">Login</button>
-			</form>
-		)}
-	</div>
+			)}
+        </div>
+    </div>	
 </nav>
 <style>
 	nav {
 		display: flex;
 		align-items: center;
-		justify-content: space-around;
+		justify-content: space-evenly;
 		height: 75px;
-		background-color: #000;
 		color: #FFF;
 	}
 
 	nav a {
 		color: #FFF;
 		text-decoration: none;
+	}
+
+	.dropdown {
+		color: black;
+	    position: sticky;
+	    top: 20px;
+	    left: 875px;
+	    display: inline-block;
+	}
+
+	.dropdown-content {
+	    display: none;
+	    position: absolute;
+	    background-color: #f9f9f9;
+		min-width: fit-content;
+	    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+	    z-index: 1;
+	}
+
+	.dropdown-content a, p {
+		all: unset;
+		min-width: fit-content;
+	    padding: 12px 16px;
+	    text-decoration: none;
+	    display: block;
+		white-space: nowrap;
+	}
+
+	.actionButton {
+		all: unset;
+		min-width: fit-content;
+		padding: 12px 16px;
+		text-decoration: none;
+		display: block;
+		width: 100%;		
+		box-sizing: border-box;
+	}
+
+	.dropdown-content a:hover, .actionButton:hover {
+	    background-color: #f1f1f1;
+		cursor: pointer;
+	}
+
+	.dropdown:hover .dropdown-content {
+	    display: block;
+	}
+
+	@media (max-width: 600px) {
+	 .dropdown {
+	    position-anchor: right;
+	 }
 	}
 </style>
