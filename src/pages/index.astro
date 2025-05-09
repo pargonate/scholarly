@@ -1,50 +1,30 @@
 ---
-// Route Protection (Server)
-import { protectRoute } from "../lib/auth.ts";
-const result = await protectRoute(Astro);
-
-if (result.redirect) {
-	return Astro.redirect(result.redirect);
-}
-
 // Server-Client 
 import Layout from "../layouts/Layout.astro";
 ---
 <Layout title="Landing Page" description="Showcase of Scholarly and what it can do">
-	<h1>Welcome to Scholarly!</h1>
+	<div id="content">
+		<h1>Welcome to Scholarly!</h1>
+		<p>Our platform allows teachers and students to easily see course information and build student schedules!</p>
+
+		<h1>Accounts</h1>
+		<p>Each teacher and student is assigned an account so that your data saves no matter what!</p>
+		<p>There are teacher accounts and student accounts. Teachers can create courses, but cannot have a schedule.</p>
+		<p>Students can't create courses, but see the courses available and add them to a schedule.</p>
+
+		<h1>Menu</h1>
+		<p>Up in the navigation bar, you can use the menu to navigate our platform, and the features available to you.</p>
+
+		<h1>Credits</h1>
+		<h3>Nathan Parker - Backend Developer</h3>
+		<h3>Megan Mann - Frontend Developer</h3>
+		<h3>Brenden Overstreet - Concept Designer</h3>
+	</div>
 </Layout>
 <style>
-	table {
-		border-collapse: collapse;
-		width: 100%;
-	}
-
-	th,
-	td {
-		border: 1px solid #ddd;
-		padding: 8px;
-	}
-
-	#courseName-wrapper {
+	#content {
 		display: flex;
-		gap: 15px;
-	}
-
-		#courseControls {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			gap: 5px;
-		}
-
-	.courseControl {
-		all: unset;
-		line-height: 0px;
-		cursor: pointer;
-	}
-
-	th {
-		background-color: #f2f2f2;
-		text-align: left;
+		align-items: center;
+		flex-direction: column;
 	}
 </style>
