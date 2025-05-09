@@ -1,60 +1,24 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Form from "../components/Form.astro";
 ---
 
 <Layout title="Log in" description="With a valid and made account, users can log into Scholarly">
-	<div id="form-wrapper">
-		<div id="form-container">
-			<h1>Log into Scholarly</h1>
-			<p>New Here? <a href="/register">Create an account!</a></p>
-			<form action="/api/auth/login" method="post" id="form">
-				<div class=input>
-					<label for="email">Email</label>
-					<input type="email" name="email" id="email" />				
-				</div>
-		
-				<div class=input>
-					<label for="password">Password</label>
-					<input type="password" name="password" id="password" />
-				</div>
-		
-				<button type="submit">Login!</button>
-			</form>
-		</div>
-	</div>
+	<Form>
+		<h1>Log into Scholarly</h1>
+		<p>New Here? <a href="/register">Create an account!</a></p>
+		<form action="/api/auth/login" method="post" id="form">
+			<div class=input>
+				<label for="email">Email</label>
+				<input type="email" name="email" id="email" />				
+			</div>
+	
+			<div class=input>
+				<label for="password">Password</label>
+				<input type="password" name="password" id="password" />
+			</div>
+	
+			<button type="submit">Login!</button>
+		</form>		
+	</Form>
 </Layout>
-
-<style>
-	#form-wrapper {
-		width: 100vw;
-		height: 100vh;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-	}
-
-	#form-container {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		width: fit-content;
-		color: black;
-		min-height: fit-content;
-		background-color: #DDDDDD;
-		padding: 0 25px;
-	}
-
-	#form {
-		display: flex;
-		flex-direction: column;
-		padding: 25px 0;
-		gap: 25px;
-		height: fit-content;
-	}
-
-	.input {
-		display: flex;
-		flex-direction: column;		
-	}
-</style>
