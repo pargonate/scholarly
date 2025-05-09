@@ -1,0 +1,48 @@
+<div id="container">
+	<table>
+		<slot/>
+	</table>
+</div>
+<style is:inline>
+	#container {
+		display: flex;
+		align-items: center;
+		gap: 25px;
+		flex-direction: column-reverse;
+	}
+
+	table {
+		border-collapse: collapse;
+		width: 75%;
+		color: #FFF;
+	}
+
+	th,
+	td {
+		border: 2px solid #AAAAAA;
+		padding: 30px;
+	}
+
+	th {
+		background-color: #DDDDDD;
+		color: black;
+	}
+
+	#courseName-wrapper {
+		display: flex;
+		gap: 15px;
+	}
+
+		#courseControls {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 5px;
+		}
+
+	.courseControl {
+		all: unset;
+		line-height: 0px;
+		cursor: pointer;
+	}
+</style>
